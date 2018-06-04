@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from DQMServices.Core.DQMEDHarvester import DQMEDHarvester
 process = cms.Process("HLTBTAG")
+# process = cms.Process("MYHLT")
 
 from PhysicsTools.PatAlgos.tools.coreTools import *	
 process.load('FWCore.MessageService.MessageLogger_cfi')
@@ -61,6 +62,7 @@ process.hltBtagJetsbyRef.jets = cms.InputTag(fileini.jets)
 
 #define VertexValidationVertices for the vertex DQM validation
 process.VertexValidationVertices= cms.EDAnalyzer("HLTVertexPerformanceAnalyzer",
+        mainFolder   = cms.string("HLT/BTV/Validation"),
 	SimVertexCollection = cms.InputTag("g4SimHits"),
 	TriggerResults = cms.InputTag('TriggerResults','',fileini.processname),
 	HLTPathNames = cms.vstring(fileini.vertex_pathes),
@@ -70,6 +72,7 @@ process.VertexValidationVertices= cms.EDAnalyzer("HLTVertexPerformanceAnalyzer",
 #define bTagValidation for the b-tag DQM validation (distribution plot)
 process.bTagValidation = cms.EDAnalyzer("HLTBTagPerformanceAnalyzer",
 	TriggerResults = cms.InputTag('TriggerResults','',fileini.processname),
+        mainFolder   = cms.string("HLT/BTV/Validation"),
 	HLTPathNames = cms.vstring(fileini.btag_pathes),
 	JetTag = fileini.btag_modules,
 	MinJetPT = cms.double(20),
@@ -85,6 +88,7 @@ process.bTagValidation = cms.EDAnalyzer("HLTBTagPerformanceAnalyzer",
 
 #define bTagPostValidation for the b-tag DQM validation (efficiency and mistagrate plot)
 process.bTagPostValidation = DQMEDHarvester("HLTBTagHarvestingAnalyzer",
+        mainFolder   = cms.string("HLT/BTV/Validation"),
 	HLTPathNames = fileini.btag_pathes,
 	histoName	= fileini.btag_modules_string,
 	minTag	= cms.double(0.6),
@@ -131,3 +135,4 @@ process.options = cms.untracked.PSet(
 process.maxEvents = cms.untracked.PSet(
 	input = cms.untracked.int32(int(fileini.maxEvents))
 )
+

@@ -17,7 +17,7 @@ class fileINI:
 		 self.maxEvents=ConfigSectionMap("config")["maxevents"]
 #		 self.denominatorTriggerPath=ConfigSectionMap("config")["denominatorTriggerPath"]
 
-		 files=files.splitlines()
+		 files=files.split(',')
 		 self.files=filter(lambda x: len(x)>0,files)
 
 		 self.btag_modules=cms.VInputTag()

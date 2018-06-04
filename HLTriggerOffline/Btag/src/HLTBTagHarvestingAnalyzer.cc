@@ -1,4 +1,5 @@
 #include "HLTriggerOffline/Btag/interface/HLTBTagHarvestingAnalyzer.h"
+#include "TString.h"
 
 HLTBTagHarvestingAnalyzer::HLTBTagHarvestingAnalyzer(const edm::ParameterSet& iConfig)
 {
@@ -10,9 +11,9 @@ HLTBTagHarvestingAnalyzer::HLTBTagHarvestingAnalyzer(const edm::ParameterSet& iC
 	m_histoName				= iConfig.getParameter<std::vector<std::string> >("histoName");
 	m_minTag				= iConfig.getParameter<double>("minTag");
 
-	HCALSpecialsNames[HEP17] = "HEP17";
-	HCALSpecialsNames[HEP18] = "HEP18";
-	HCALSpecialsNames[HEM17] = "HEM17";
+	// HCALSpecialsNames[HEP17] = "HEP17";
+	// HCALSpecialsNames[HEP18] = "HEP18";
+	// HCALSpecialsNames[HEM17] = "HEM17";
 }
 
 HLTBTagHarvestingAnalyzer::~HLTBTagHarvestingAnalyzer()
@@ -32,7 +33,7 @@ HLTBTagHarvestingAnalyzer::dqmEndJob(DQMStore::IBooker & ibooker, DQMStore::IGet
 	{
 	  dqmFolder_hist = Form("%s/Discriminator/%s",mainFolder_.c_str(),hltPathNames_[ind].c_str());
 	  std::string effDir = Form("%s/Discriminator/%s/efficiency",mainFolder_.c_str(),hltPathNames_[ind].c_str());
-	  std::string relationsDir = Form("%s/Discriminator/%s/HEP17_HEM17",mainFolder_.c_str(),hltPathNames_[ind].c_str());
+	  // std::string relationsDir = Form("%s/Discriminator/%s/HEP17_HEM17",mainFolder_.c_str(),hltPathNames_[ind].c_str());
 		ibooker.setCurrentFolder(effDir);
 		TH1 *den =nullptr;
 		TH1 *num =nullptr; 
@@ -46,6 +47,9 @@ HLTBTagHarvestingAnalyzer::dqmEndJob(DQMStore::IBooker & ibooker, DQMStore::IGet
 			std::string label= m_histoName.at(ind) + "__"; //"JetTag__";
 			std::string flavour= m_mcLabels[i];
 			label+=flavour;
+                        TString tlabel = (TString) label;
+                        tlabel.ReplaceAll(":probb","");
+                        label = (std::string) tlabel;
 			isOK=GetNumDenumerators(ibooker,igetter,dqmFolder_hist+"/"+label,dqmFolder_hist+"/"+label,num,den,0);
 			if (isOK){
 			
@@ -54,18 +58,21 @@ HLTBTagHarvestingAnalyzer::dqmEndJob(DQMStore::IBooker & ibooker, DQMStore::IGet
 				efficsOK[flavour]=isOK;
 			}
 			//for modules (HEP17 etc.)
-			for (auto j: HCALSpecialsNames){
-				ibooker.setCurrentFolder(dqmFolder_hist+"/"+j.second+"/efficiency");
-				isOK=GetNumDenumerators(ibooker,igetter,dqmFolder_hist+"/"+j.second+"/"+label,dqmFolder_hist+"/"+j.second+"/"+label,num,den,0);
-				if (isOK){
+			// for (auto j: HCALSpecialsNames){
+			// 	ibooker.setCurrentFolder(dqmFolder_hist+"/"+j.second+"/efficiency");
+			// 	isOK=GetNumDenumerators(ibooker,igetter,dqmFolder_hist+"/"+j.second+"/"+label,dqmFolder_hist+"/"+j.second+"/"+label,num,den,0);
+			// 	if (isOK){
 			
-					//do the 'b-tag efficiency vs discr' plot
-					efficsmod[flavour][j.first]=calculateEfficiency1D(ibooker,igetter,*num,*den,label+"_efficiency_vs_disc");
-					efficsmodOK[flavour][j.first]=isOK;
-				}
-			}
+			// 		//do the 'b-tag efficiency vs discr' plot
+			// 		efficsmod[flavour][j.first]=calculateEfficiency1D(ibooker,igetter,*num,*den,label+"_efficiency_vs_disc");
+			// 		efficsmodOK[flavour][j.first]=isOK;
+			// 	}
+			// }
 			ibooker.setCurrentFolder(effDir);
 			label= m_histoName.at(ind)+"___";
+                        tlabel = (TString) label;
+                        tlabel.ReplaceAll(":probb","");
+                        label = (std::string) tlabel;
 			std::string labelEta = label;
 			std::string labelPhi = label;
 			label+=flavour+"_disc_pT";
@@ -90,36 +97,42 @@ HLTBTagHarvestingAnalyzer::dqmEndJob(DQMStore::IBooker & ibooker, DQMStore::IGet
 				TH1F eff=calculateEfficiency1D(ibooker,igetter,*num,*den,labelPhi+"_efficiency_vs_phi");
 			}
 
-			///save efficiency_vs_disc_HEP17 / efficiency_vs_disc_HEM17 plots
-			ibooker.setCurrentFolder(relationsDir);
-			if (efficsmodOK[flavour][HEP17] && efficsmodOK[flavour][HEM17]) 
-				modulesrate(ibooker,igetter,&efficsmod[flavour][HEP17], &efficsmod[flavour][HEM17], m_histoName.at(ind)+"_"+flavour+"_HEP17_HEM17_effs_vs_disc_rate" );
-			ibooker.setCurrentFolder(effDir);
+			// ///save efficiency_vs_disc_HEP17 / efficiency_vs_disc_HEM17 plots
+			// ibooker.setCurrentFolder(relationsDir);
+			// if (efficsmodOK[flavour][HEP17] && efficsmodOK[flavour][HEM17]) 
+			// 	modulesrate(ibooker,igetter,&efficsmod[flavour][HEP17], &efficsmod[flavour][HEM17], m_histoName.at(ind)+"_"+flavour+"_HEP17_HEM17_effs_vs_disc_rate" );
+			// ibooker.setCurrentFolder(effDir);
 
 		} /// for mc labels
 		
-		///save mistagrate vs b-eff plots
-		if (efficsOK["b"] && efficsOK["c"])      mistagrate(ibooker,igetter,&effics["b"], &effics["c"], m_histoName.at(ind)+"_b_c_mistagrate" );
-		if (efficsOK["b"] && efficsOK["light"])  mistagrate(ibooker,igetter,&effics["b"], &effics["light"], m_histoName.at(ind)+"_b_light_mistagrate" );
-		if (efficsOK["b"] && efficsOK["g"])      mistagrate(ibooker,igetter,&effics["b"], &effics["g"], m_histoName.at(ind)+"_b_g_mistagrate" );
+		///save mistagrate vs b-eff plots<
+                
+                std::string label= m_histoName.at(ind);
+                TString tlabel = (TString) label;
+                tlabel.ReplaceAll(":probb","");
+                label = (std::string) tlabel;
+
+		if (efficsOK["b"] && efficsOK["c"])      mistagrate(ibooker,igetter,&effics["b"], &effics["c"], label+"_b_c_mistagrate" );
+		if (efficsOK["b"] && efficsOK["light"])  mistagrate(ibooker,igetter,&effics["b"], &effics["light"], label+"_b_light_mistagrate" );
+		if (efficsOK["b"] && efficsOK["g"])      mistagrate(ibooker,igetter,&effics["b"], &effics["g"], label+"_b_g_mistagrate" );
 
 		///save mistagrate vs b-eff plots for modules (HEP17 etc.)
-		for (auto j: HCALSpecialsNames){
-			ibooker.setCurrentFolder(dqmFolder_hist+"/"+j.second+"/efficiency");
-			if (efficsmodOK["b"][j.first] && efficsmodOK["c"][j.first])      mistagrate(ibooker,igetter,&efficsmod["b"][j.first], &efficsmod["c"][j.first], m_histoName.at(ind)+"_b_c_mistagrate" );
-			if (efficsmodOK["b"][j.first] && efficsmodOK["light"][j.first])  mistagrate(ibooker,igetter,&efficsmod["b"][j.first], &efficsmod["light"][j.first], m_histoName.at(ind)+"_b_light_mistagrate" );
-			if (efficsmodOK["b"][j.first] && efficsmodOK["g"][j.first])      mistagrate(ibooker,igetter,&efficsmod["b"][j.first], &efficsmod["g"][j.first], m_histoName.at(ind)+"_b_g_mistagrate" );
-		}
+		// for (auto j: HCALSpecialsNames){
+		// 	ibooker.setCurrentFolder(dqmFolder_hist+"/"+j.second+"/efficiency");
+		// 	if (efficsmodOK["b"][j.first] && efficsmodOK["c"][j.first])      mistagrate(ibooker,igetter,&efficsmod["b"][j.first], &efficsmod["c"][j.first], m_histoName.at(ind)+"_b_c_mistagrate" );
+		// 	if (efficsmodOK["b"][j.first] && efficsmodOK["light"][j.first])  mistagrate(ibooker,igetter,&efficsmod["b"][j.first], &efficsmod["light"][j.first], m_histoName.at(ind)+"_b_light_mistagrate" );
+		// 	if (efficsmodOK["b"][j.first] && efficsmodOK["g"][j.first])      mistagrate(ibooker,igetter,&efficsmod["b"][j.first], &efficsmod["g"][j.first], m_histoName.at(ind)+"_b_g_mistagrate" );
+		// }
 		
 		///save mistagrate_HEP17 / mistagrate_HEM17 plots
-		ibooker.setCurrentFolder(relationsDir);
-		bool isOK=false;
-		isOK=GetNumDenumerators(ibooker,igetter,dqmFolder_hist+"/HEP17/efficiency/"+m_histoName.at(ind)+"_b_c_mistagrate",dqmFolder_hist+"/HEM17/efficiency/"+m_histoName.at(ind)+"_b_c_mistagrate",num,den,3);
-		if (isOK) modulesrate(ibooker,igetter,(TH1F*)num, (TH1F*)den, m_histoName.at(ind)+"_HEP17_HEM17_b_c_mistagrate" );
-		isOK=GetNumDenumerators(ibooker,igetter,dqmFolder_hist+"/HEP17/efficiency/"+m_histoName.at(ind)+"_b_light_mistagrate",dqmFolder_hist+"/HEM17/efficiency/"+m_histoName.at(ind)+"_b_light_mistagrate",num,den,3);
-		if (isOK) modulesrate(ibooker,igetter,(TH1F*)num, (TH1F*)den, m_histoName.at(ind)+"_HEP17_HEM17_b_light_mistagrate" );
-		isOK=GetNumDenumerators(ibooker,igetter,dqmFolder_hist+"/HEP17/efficiency/"+m_histoName.at(ind)+"_b_g_mistagrate",dqmFolder_hist+"/HEM17/efficiency/"+m_histoName.at(ind)+"_b_g_mistagrate",num,den,3);
-		if (isOK) modulesrate(ibooker,igetter,(TH1F*)num, (TH1F*)den, m_histoName.at(ind)+"_HEP17_HEM17_b_g_mistagrate" );
+		// ibooker.setCurrentFolder(relationsDir);
+		// bool isOK=false;
+		// isOK=GetNumDenumerators(ibooker,igetter,dqmFolder_hist+"/HEP17/efficiency/"+m_histoName.at(ind)+"_b_c_mistagrate",dqmFolder_hist+"/HEM17/efficiency/"+m_histoName.at(ind)+"_b_c_mistagrate",num,den,3);
+		// if (isOK) modulesrate(ibooker,igetter,(TH1F*)num, (TH1F*)den, m_histoName.at(ind)+"_HEP17_HEM17_b_c_mistagrate" );
+		// isOK=GetNumDenumerators(ibooker,igetter,dqmFolder_hist+"/HEP17/efficiency/"+m_histoName.at(ind)+"_b_light_mistagrate",dqmFolder_hist+"/HEM17/efficiency/"+m_histoName.at(ind)+"_b_light_mistagrate",num,den,3);
+		// if (isOK) modulesrate(ibooker,igetter,(TH1F*)num, (TH1F*)den, m_histoName.at(ind)+"_HEP17_HEM17_b_light_mistagrate" );
+		// isOK=GetNumDenumerators(ibooker,igetter,dqmFolder_hist+"/HEP17/efficiency/"+m_histoName.at(ind)+"_b_g_mistagrate",dqmFolder_hist+"/HEM17/efficiency/"+m_histoName.at(ind)+"_b_g_mistagrate",num,den,3);
+		// if (isOK) modulesrate(ibooker,igetter,(TH1F*)num, (TH1F*)den, m_histoName.at(ind)+"_HEP17_HEM17_b_g_mistagrate" );
 	} /// for triggers
 }
 

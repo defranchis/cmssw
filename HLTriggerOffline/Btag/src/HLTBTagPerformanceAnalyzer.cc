@@ -243,7 +243,6 @@ void HLTBTagPerformanceAnalyzer::bookHistograms(DQMStore::IBooker & ibooker, edm
 			if ( JetTagCollection_Label[ind] != "" && JetTagCollection_Label[ind] != "NULL" ) {
 				label=JetTagCollection_Label[ind]+"__";
 				label+=flavour;
-
 				//book 1D btag plot for 'b,c,light,g'
 				H1_.back()[label] = 		 ibooker.book1D(label,   Form("%s %s",JetTagCollection_Label[ind].c_str(),flavour.c_str()), btagBins, btagL, btagU );
 				H1_.back()[label]->setAxisTitle("disc",1);
