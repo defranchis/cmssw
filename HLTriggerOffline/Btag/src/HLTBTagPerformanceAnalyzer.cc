@@ -23,7 +23,7 @@ HLTBTagPerformanceAnalyzer::HLTBTagPerformanceAnalyzer(const edm::ParameterSet& 
 {
 	mainFolder_                     = iConfig.getParameter<std::string>("mainFolder");
 	hlTriggerResults_   		= consumes<edm::TriggerResults>(iConfig.getParameter<InputTag> ("TriggerResults"));
-	JetTagCollection_ 			= edm::vector_transform(iConfig.getParameter<std::vector<edm::InputTag> >( "JetTag" ), [this](edm::InputTag const & tag){return mayConsume< reco::JetTagCollection>(tag);});
+	JetTagCollection_ 			= edm::vector_transform(iConfig.getParameter<std::vector<edm::InputTag> >( "JetTag" ), [this](edm::InputTag const & tag){return consumes< reco::JetTagCollection>(tag);});
 	m_mcPartons 				= consumes<JetFlavourMatchingCollection>(iConfig.getParameter<InputTag> ("mcPartons") ); 
 	hltPathNames_        		= iConfig.getParameter< std::vector<std::string> > ("HLTPathNames");
 	edm::ParameterSet mc 		= iConfig.getParameter<edm::ParameterSet>("mcFlavours");
@@ -35,6 +35,7 @@ HLTBTagPerformanceAnalyzer::HLTBTagPerformanceAnalyzer(const edm::ParameterSet& 
 	for(unsigned int i=0; i<JetTagCollection_.size() ; i++){
 		EDConsumerBase::labelsForToken(JetTagCollection_[i],label);
 		JetTagCollection_Label.push_back(label.module);
+                std::cout<<label.module<<std::endl;
 	}
 
 	EDConsumerBase::labelsForToken(hlTriggerResults_,label);

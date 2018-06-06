@@ -12,8 +12,9 @@ process.DQM_BTag = cms.Path(    process.hltbtagValidationSequence + process.HltB
 
 
 process.source = cms.Source("PoolSource",
-	fileNames = cms.untracked.vstring("root://cms-xrd-global.cern.ch//store/relval/CMSSW_8_1_0_pre7/RelValTTbar_13/GEN-SIM-DIGI-RAW-HLTDEBUG/81X_mcRun2_asymptotic_v0-v1/10000/1E660EDB-F135-E611-9E57-0CC47A4D76C8.root")
+	# fileNames = cms.untracked.vstring("root://cms-xrd-global.cern.ch//store/relval/CMSSW_8_1_0_pre7/RelValTTbar_13/GEN-SIM-DIGI-RAW-HLTDEBUG/81X_mcRun2_asymptotic_v0-v1/10000/1E660EDB-F135-E611-9E57-0CC47A4D76C8.root")
 #	fileNames = cms.untracked.vstring("file:RelVal750pre3.root")
+        fileNames = cms.untracked.vstring("root://cms-xrd-global.cern.ch//store/relval/CMSSW_10_2_0_pre4/RelValTTbar_13/GEN-SIM-DIGI-RAW/102X_upgrade2018_realistic_v1-v1/20000/32CDF73D-7061-E811-8ADF-0025905B85DA.root")
 )
 
 
@@ -28,7 +29,7 @@ process.DQMStore.collateHistograms = False
 process.DQMStore.verbose=0
 process.options = cms.untracked.PSet(
 	wantSummary	= cms.untracked.bool( True ),
-	fileMode	= cms.untracked.string('FULLMERGE'),
-	SkipEvent	= cms.untracked.vstring('ProductNotFound')
+	fileMode	= cms.untracked.string('FULLMERGE')
+	# SkipEvent	= cms.untracked.vstring('ProductNotFound')
 )
 
